@@ -1,0 +1,51 @@
+CREATE DATABASE `Olist_Project`;
+USE `Olist_Project`;
+SELECT 
+    CASE 
+        WHEN DAYOFWEEK(o.order_purchase_timestamp) IN (1, 7) THEN 'Weekend'
+        ELSE 'Weekday'
+    END AS Day_Type,
+    ROUND(SUM(p.payment_value), 2) AS Total_Payment_Value
+FROM olist_orders_dataset o
+JOIN olist_order_payments_dataset p 
+    ON o.order_id = p.order_id
+GROUP BY Day_Type;
+SELECT 
+    COUNT(DISTINCT p.order_id) AS Total_5_Star_Credit_Card_Orders
+FROM olist_order_payments_dataset p
+JOIN olist_order_reviews_dataset r 
+    ON p.order_id = r.order_id
+WHERE r.review_score = 5 
+  AND p.payment_type = 'credit_card';
+  SELECT 
+    ROUND(AVG(DATEDIFF(o.order_delivered_customer_date, o.order_purchase_timestamp)), 0) AS Avg_Delivery_Days_Pet_Shop
+FROM olist_orders_dataset o
+JOIN olist_order_items_dataset i 
+    ON o.order_id = i.order_id
+JOIN olist_products_dataset pr 
+    ON i.product_id = pr.product_id
+JOIN product_category_name_translation t 
+    ON pr.product_category_name = t.product_category_name
+WHERE t.product_category_name_english LIKE '%pet_shop%'
+  AND o.order_delivered_customer_date IS NOT NULL;
+  SELECT 
+    ROUND(AVG(i.price), 2) AS Average_Item_Price,
+    ROUND(AVG(p.payment_value), 2) AS Average_Payment_Value
+FROM olist_customers_dataset c
+JOIN olist_orders_dataset o 
+    ON c.customer_id = o.customer_id
+JOIN olist_order_items_dataset i 
+    ON o.order_id = i.order_id
+JOIN olist_order_payments_dataset p 
+    ON o.order_id = p.order_id
+WHERE c.customer_city = 'sao paulo';
+SELECT 
+    r.review_score AS Review_Score,
+    ROUND(AVG(DATEDIFF(o.order_delivered_customer_date, o.order_purchase_timestamp)), 2) AS Avg_Shipping_Days
+FROM olist_orders_dataset o
+JOIN olist_order_reviews_dataset r 
+    ON o.order_id = r.order_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY r.review_score
+ORDER BY r.review_score DESC;
+  
